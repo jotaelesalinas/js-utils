@@ -6,6 +6,7 @@ Reads and converts text from/to Excel (as tab-separated values) and JS objects
 
 ## To do
 
+- [ ] add usage instructions to this file
 - [ ] add tests
 - [ ] method toCsv(sep = ',', quote = '"')
 - [ ] method toJson() --> shortcut for JSON.stringify(<tabular object>.toObjectArray())
