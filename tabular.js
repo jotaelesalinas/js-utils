@@ -27,6 +27,9 @@ Tabular = function (data) {
 
 // Get the data as TSV
 Tabular.prototype.toTsv = function () {
+	if (this.raw.length > 0) {
+		this.raw[0] = Tabular._makeHeaders(this.raw[0]);
+	}
 	return this.raw.map(row => row.join("\t")).join("\n");
 };
 
@@ -43,19 +46,17 @@ Tabular.prototype.toObjectArray = function () {
 	return data;
 };
 
-// Get the data as an HTML table
+// Get the data as an HTML table.
+// css_class_func accepts one of these combination of arguments:
+//  - function ('table') { ... }
+//  - function ('row', row_contents, row_index) {}
+//  - function ('cell', row_contents, row_index, cell_contents, cell_index) {}
+// and should return a class to be applied or null.
+// the headers row is row[0].
 Tabular.prototype.toHtml = function (css_class_func) {
 	if (typeof css_class_func != 'function') {
 		css_class_func = () => null;
 	}
-	
-	/*
-	 * css_class_func accepts one of these:
-	 *  - function ('table') {}
-	 *  - function ('row', row_contents, row_index) {}
-	 *  - function ('cell', row_contents, row_index, cell_contents, cell_index) {}
-	 * 
-	 */
 	
 	var openTag = (tag, css) => '<' + tag + (css ? ' class="' + css + '"' : '') + '>';
 
@@ -89,6 +90,24 @@ Tabular._tsvToRaw = function (data) {
 
 // Converts an array of objects to the internal format of the data
 Tabular._objectArrayToRaw = function (data) {
+	if (data.constructor.name != 'Array') {
+		throw "Tabular._objectArrayToRaw(): data must be of type Array.";
+	}
+	
+	data = data.map(x => {
+			if (x.constructor.name == 'Object') {
+				return x;
+			} else if (typeof x.toObject == 'function') {
+				var obj = x.toObject();
+				if (obj.constructor.name != 'Object') {
+					throw "Tabular._objectArrayToRaw(): returned value from toObject() is not an object.";
+				}
+				return obj;
+			} else {
+				throw "Tabular._objectArrayToRaw(): not all items are objects or implement toObject().";
+			}
+		});
+	
 	var headers = Tabular._allKeysFromObjectArray(data);
 	
 	var rows = [];
