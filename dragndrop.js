@@ -130,7 +130,11 @@ Dragndrop.prototype.attachTo = function (el) {
         
         this._files = Array.from(evt.dataTransfer.files).map(Dragndrop._initFileDataFromFileApi);
 
-        this._processFiles(evt.dataTransfer.files);
+        this._processFiles(evt.dataTransfer.files)
+            .catch(err => {
+                this._log('Error: ' + err);
+                this._callListener(Dragndrop.eventType.fail, err);
+            });
     };
     
     el.addEventListener('dragover', handleDragOver, false);
@@ -145,7 +149,8 @@ Dragndrop.eventType = {
     afterFileFail: 'afterFileFail',
     afterFile:     'afterFile',
     finish:        'finish',
-    progress:      'progress'
+    progress:      'progress',
+    fail:          'fail',
 };
 
 Dragndrop.fileStatus = {
@@ -206,10 +211,15 @@ Dragndrop.prototype._processFiles = function () {
     this._log('Processing ' + this._files.length + ' file' + (this._files.length != 1 ? 's' : '') + '...');
     this._files.forEach((f,i) => this._log('#' + i + ': ' + f.name + ' (' + f.file.size + ' bytes)'));
     
-    this._callListener(Dragndrop.eventType.start, this._files);
-    this._callListener(Dragndrop.eventType.progress, this.count(), this.countFinished(), this.countPending());
+    return new Promise((resolve, reject) => {
+        try {
+            this._callListener(Dragndrop.eventType.start, this._files);
+            this._callListener(Dragndrop.eventType.progress, this.count(), this.countFinished(), this.countPending());
+        } catch (err) {
+            reject(err);
+            return;
+        }
     
-    return new Promise(resolve => {
         this._files.forEach((file, idx) => {
             try {
                 this._log('Triggering event ' + Dragndrop.eventType.beforeFile + '...', idx);
