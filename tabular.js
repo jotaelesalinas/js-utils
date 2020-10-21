@@ -5,7 +5,7 @@
  * 
  * Reads and converts text from/to Excel (as tab-separated values) and JS objects.
  * 
- * See tabular-v*.md for details.
+ * See tabular.md for details.
  *
  * Released under the MIT license.
  */
