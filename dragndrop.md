@@ -26,12 +26,12 @@ Fluent:
 
 ```javascript
 new Dragndrop()
-	->on('start', files => { if (files.length > 1) throw "Only one file is accepted."; })
-	->on('beforeFile', file => { if (!file.name.match(/\.csv$/i)) throw new SkippedFileError("Not a CSV file."); })
-	->on('progress', (total, done, pending) => console.log('Progress: ' + (done * 100 / total).toFixed(2) + '%'))
-	->on('finish', files => document.querySelector('textarea.input-text').value = files[0].contents)
-	->withMapper(contents => parse_csv(contents))
-	->attachTo('textarea.input-text');
+    ->on('start', files => { if (files.length > 1) throw "Only one file is accepted."; })
+    ->on('beforeFile', file => { if (!file.name.match(/\.csv$/i)) throw new SkippedFileError("Not a CSV file."); })
+    ->on('progress', (total, done, pending) => console.log('Progress: ' + (done * 100 / total).toFixed(2) + '%'))
+    ->on('finish', files => document.querySelector('textarea.input-text').value = files[0].contents)
+    ->withMapper(contents => parse_csv(contents))
+    ->attachTo('textarea.input-text');
 ```
 
 ### Event types
