@@ -90,6 +90,11 @@ If you want to skip a file, throw a `SkippedFileError` during the event handlers
 
 Any other type of error thrown will make the file fail.
 
+## To do
+
+- [ ] Create tests
+- [ ] Add some way to report _in-file_ progress?
+
 ## Changelog
 
 v1.0, 2020-10-20
