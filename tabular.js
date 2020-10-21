@@ -14,36 +14,36 @@
 // data: TSV string or array of JS objects
 // for other data types, use static from*() methods
 Tabular = function (data) {
-	this.raw = null;
-	
-	if (data.constructor.name == 'String') {
-		this.raw = Tabular._tsvToRaw(data);
-	} else if (data.constructor.name == 'Array') {
-		this.raw = Tabular._objectArrayToRaw(data);
-	} else {
-		throw 'Tabular(): Wrong data format.';
-	}
+    this.raw = null;
+    
+    if (data.constructor.name == 'String') {
+        this.raw = Tabular._tsvToRaw(data);
+    } else if (data.constructor.name == 'Array') {
+        this.raw = Tabular._objectArrayToRaw(data);
+    } else {
+        throw 'Tabular(): Wrong data format.';
+    }
 }
 
 // Get the data as TSV
 Tabular.prototype.toTsv = function () {
-	if (this.raw.length > 0) {
-		this.raw[0] = Tabular._makeHeaders(this.raw[0]);
-	}
-	return this.raw.map(row => row.join("\t")).join("\n");
+    if (this.raw.length > 0) {
+        this.raw[0] = Tabular._makeHeaders(this.raw[0]);
+    }
+    return this.raw.map(row => row.join("\t")).join("\n");
 };
 
 // Get the data as an array of objects
 Tabular.prototype.toObjectArray = function () {
-	var first_line = this.raw.shift();
-					
-	var headers = Tabular._makeHeaders(first_line);
-	
-	var data = this.raw.map(line => Tabular._makeObjectFromRawEntry(line, headers));
-	
-	this.raw.unshift(first_line);
-	
-	return data;
+    var first_line = this.raw.shift();
+                    
+    var headers = Tabular._makeHeaders(first_line);
+    
+    var data = this.raw.map(line => Tabular._makeObjectFromRawEntry(line, headers));
+    
+    this.raw.unshift(first_line);
+    
+    return data;
 };
 
 // Get the data as an HTML table.
@@ -54,114 +54,114 @@ Tabular.prototype.toObjectArray = function () {
 // and should return a class to be applied or null.
 // the headers row is row[0].
 Tabular.prototype.toHtml = function (css_class_func) {
-	if (typeof css_class_func != 'function') {
-		css_class_func = () => null;
-	}
-	
-	var openTag = (tag, css) => '<' + tag + (css ? ' class="' + css + '"' : '') + '>';
+    if (typeof css_class_func != 'function') {
+        css_class_func = () => null;
+    }
+    
+    var openTag = (tag, css) => '<' + tag + (css ? ' class="' + css + '"' : '') + '>';
 
-	var html = [];
-	
-	html.push(openTag('table', css_class_func('table', this.raw)));
-	this.raw.forEach((row, row_idx) => {
-		html.push(openTag('tr', css_class_func('row', row, row_idx)));
-			row.forEach((cell, cell_idx) => {
-				var tag = row_idx == 0 ? 'th' : 'td';
-				html.push(
-					openTag(tag, css_class_func('cell', row, row_idx, cell, cell_idx)) +
-					cell +
-					'</' + tag + '>'
-				);
-			});
-		html.push('</tr>');
-	});
-	html.push('</table>');
-	
-	return html.join("\n");
+    var html = [];
+    
+    html.push(openTag('table', css_class_func('table', this.raw)));
+    this.raw.forEach((row, row_idx) => {
+        html.push(openTag('tr', css_class_func('row', row, row_idx)));
+            row.forEach((cell, cell_idx) => {
+                var tag = row_idx == 0 ? 'th' : 'td';
+                html.push(
+                    openTag(tag, css_class_func('cell', row, row_idx, cell, cell_idx)) +
+                    cell +
+                    '</' + tag + '>'
+                );
+            });
+        html.push('</tr>');
+    });
+    html.push('</table>');
+    
+    return html.join("\n");
 };
 
 // Converts TSV to the internal format of the data
 Tabular._tsvToRaw = function (data) {
-	return data.replace(/\r/g, '')
-			   .split(/\n/g)
-			   .filter(x => x.trim() !== '')
-			   .map(x => x.split(/\t/g));
+    return data.replace(/\r/g, '')
+               .split(/\n/g)
+               .filter(x => x.trim() !== '')
+               .map(x => x.split(/\t/g));
 };
 
 // Converts an array of objects to the internal format of the data
 Tabular._objectArrayToRaw = function (data) {
-	if (data.constructor.name != 'Array') {
-		throw "Tabular._objectArrayToRaw(): data must be of type Array.";
-	}
-	
-	data = data.map(x => {
-			if (x.constructor.name == 'Object') {
-				return x;
-			} else if (typeof x.toObject == 'function') {
-				var obj = x.toObject();
-				if (obj.constructor.name != 'Object') {
-					throw "Tabular._objectArrayToRaw(): returned value from toObject() is not an object.";
-				}
-				return obj;
-			} else {
-				throw "Tabular._objectArrayToRaw(): not all items are objects or implement toObject().";
-			}
-		});
-	
-	var headers = Tabular._allKeysFromObjectArray(data);
-	
-	var rows = [];
-	rows.push(headers);
-	rows.push(...data.map(item => headers.map(h => typeof item[h] != 'undefined' ? item[h] : '')));
-	
-	return rows;
+    if (data.constructor.name != 'Array') {
+        throw "Tabular._objectArrayToRaw(): data must be of type Array.";
+    }
+    
+    data = data.map(x => {
+            if (x.constructor.name == 'Object') {
+                return x;
+            } else if (typeof x.toObject == 'function') {
+                var obj = x.toObject();
+                if (obj.constructor.name != 'Object') {
+                    throw "Tabular._objectArrayToRaw(): returned value from toObject() is not an object.";
+                }
+                return obj;
+            } else {
+                throw "Tabular._objectArrayToRaw(): not all items are objects or implement toObject().";
+            }
+        });
+    
+    var headers = Tabular._allKeysFromObjectArray(data);
+    
+    var rows = [];
+    rows.push(headers);
+    rows.push(...data.map(item => headers.map(h => typeof item[h] != 'undefined' ? item[h] : '')));
+    
+    return rows;
 };
 
 // Slugifies text using "_" as separator
 Tabular._textToColumnHeader = function (text) {
-	return text.replace(/\W+/g, ' ').trim().replace(/\s+/g, '_').toLowerCase();
+    return text.replace(/\W+/g, ' ').trim().replace(/\s+/g, '_').toLowerCase();
 };
 
 // Creates an array of headers (column names) from a line of the raw data,
 // making sure that names are not repeated by adding "_2", "_3", and so on
 Tabular._makeHeaders = function (line) {
-	var headers = line.map(Tabular._textToColumnHeader);
-	
-	headers.forEach((header, colnum) => {
-		if ( headers.indexOf(header) == colnum ) {
-			return;
-		}
-		
-		var n = 2;
-		while ( headers.indexOf(header + '_' + n) > -1 ) {
-			n++;
-		}
-		headers[colnum] = header + '_' + n;
-	} );
-	
-	return headers;
+    var headers = line.map(Tabular._textToColumnHeader);
+    
+    headers.forEach((header, colnum) => {
+        if ( headers.indexOf(header) == colnum ) {
+            return;
+        }
+        
+        var n = 2;
+        while ( headers.indexOf(header + '_' + n) > -1 ) {
+            n++;
+        }
+        headers[colnum] = header + '_' + n;
+    } );
+    
+    return headers;
 };
 
 // Creates an object out of an entry in the raw data and the headers
 Tabular._makeObjectFromRawEntry = function (line, headers) {
-	var row = {};
-	for ( var i = 0, l = headers.length; i < l; i++ ) {
-		row[headers[i]] = typeof line[i] !== 'undefined' ? line[i] : null;
-	}
-	return row;
+    var row = {};
+    for ( var i = 0, l = headers.length; i < l; i++ ) {
+        row[headers[i]] = typeof line[i] !== 'undefined' ? line[i] : null;
+    }
+    return row;
 };
 
 // Tells whether a value is the first occurrence in an array
 // (meant to be used as callback of Array.filter())
 Tabular._isFirstInArray = function (value, index, arr) {
-	return arr.indexOf(value) === index;
+    return arr.indexOf(value) === index;
 };
 
 // Gets all the properties from the passed objects
 Tabular._allKeysFromObjectArray = function (data) {
-	var cols = [];
-	data.map(x => Object.keys(x))
-		.forEach(x => cols.push(...x));
-	
-	return cols.filter(Tabular._isFirstInArray);
+    var cols = [];
+    data.map(x => Object.keys(x))
+        .forEach(x => cols.push(...x));
+    
+    return cols.filter(Tabular._isFirstInArray);
 };
