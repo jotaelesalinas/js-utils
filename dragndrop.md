@@ -74,15 +74,15 @@ The signatures of all possible event handlers are:
 
 Each file has a `status` property, which can be:
 
-- waiting: work has not yet started on this file.
+- `waiting`: work has not yet started on this file.
 
-- inProgress: this file is curently being worked on.
+- `inProgress`: this file is curently being worked on.
 
-- skipped: this file has been skipped.
+- `skipped`: this file has been skipped.
 
-- doneOk: this file finished without errors.
+- `doneOk`: this file finished without errors.
 
-- doneFail: there was an error while processing this file.
+- `doneFail`: there was an error while processing this file.
 
 ### Skipping a file
 
@@ -92,7 +92,7 @@ Any other type of error thrown will make the file fail.
 
 ## Changelog
 
-v0.1, 2020-10-20
+v1.0, 2020-10-20
 Initial release.
 
 ## License
