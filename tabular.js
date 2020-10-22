@@ -10,49 +10,58 @@
  * Released under the MIT license.
  */
 
-// Create a Tabular object
-// data: TSV string or array of JS objects
-// for other data types, use static from*() methods
+/**
+ * Create a Tabular object.
+ * @param data TSV string or array of JS objects
+ * @constructor
+ */
 Tabular = function (data) {
-    this.raw = null;
+    this._raw = null;
     
     if (data.constructor.name == 'String') {
-        this.raw = Tabular._tsvToRaw(data);
+        this._raw = Tabular._tsvToRaw(data);
     } else if (data.constructor.name == 'Array') {
-        this.raw = Tabular._objectArrayToRaw(data);
+        this._raw = Tabular._objectArrayToRaw(data);
     } else {
         throw 'Tabular(): Wrong data format.';
     }
 }
 
-// Get the data as TSV
+/**
+ * Get the data as tab-separated-values.
+ * @returns {string}
+ */
 Tabular.prototype.toTsv = function () {
-    if (this.raw.length > 0) {
-        this.raw[0] = Tabular._makeHeaders(this.raw[0]);
+    if (this._raw.length > 0) {
+        this._raw[0] = Tabular._makeHeaders(this._raw[0]);
     }
-    return this.raw.map(row => row.join("\t")).join("\n");
+    return this._raw.map(row => row.join("\t")).join("\n");
 };
 
-// Get the data as an array of objects
+/**
+ * Get the data as an array of objects.
+ * @returns {array} Array of vanilla objects
+ */
 Tabular.prototype.toObjectArray = function () {
-    var first_line = this.raw.shift();
-                    
-    var headers = Tabular._makeHeaders(first_line);
-    
-    var data = this.raw.map(line => Tabular._makeObjectFromRawEntry(line, headers));
-    
-    this.raw.unshift(first_line);
-    
+    const first_line = this._raw.shift();
+    const headers = Tabular._makeHeaders(first_line);
+    var data = this._raw.map(line => Tabular._makeObjectFromRawEntry(line, headers));
+    this._raw.unshift(first_line);
     return data;
 };
 
-// Get the data as an HTML table.
-// css_class_func accepts one of these combination of arguments:
-//  - function ('table') { ... }
-//  - function ('row', row_contents, row_index) {}
-//  - function ('cell', row_contents, row_index, cell_contents, cell_index) {}
-// and should return a class to be applied or null.
-// the headers row is row[0].
+
+/**
+ * Get the data as an HTML table.
+ * @param css_class_func A funcion to provide CSS classes for the table, rows and cells.
+ *   It accepts one of these combination of arguments:
+ *     - function ('table') { ... }
+ *     - function ('row', row_contents, row_index) {}
+ *     - function ('cell', row_contents, row_index, cell_contents, cell_index) {}
+ *   and should return a class to be applied or null.
+ *   the headers row is row[0].
+ * @returns {string}
+ */
 Tabular.prototype.toHtml = function (css_class_func) {
     if (typeof css_class_func != 'function') {
         css_class_func = () => null;
@@ -62,8 +71,8 @@ Tabular.prototype.toHtml = function (css_class_func) {
 
     var html = [];
     
-    html.push(openTag('table', css_class_func('table', this.raw)));
-    this.raw.forEach((row, row_idx) => {
+    html.push(openTag('table', css_class_func('table', this._raw)));
+    this._raw.forEach((row, row_idx) => {
         html.push(openTag('tr', css_class_func('row', row, row_idx)));
             row.forEach((cell, cell_idx) => {
                 var tag = row_idx == 0 ? 'th' : 'td';
