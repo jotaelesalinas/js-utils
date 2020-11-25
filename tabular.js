@@ -14,14 +14,15 @@
  * Create a Tabular object.
  * @param data TSV string or array of JS objects
  * @constructor
+ * For other data types, use static from*() methods.
  */
 Tabular = function (data) {
-    this._raw = null;
+    this.raw = null;
     
     if (data.constructor.name == 'String') {
-        this._raw = Tabular._tsvToRaw(data);
+        this.raw = Tabular._tsvToRaw(data);
     } else if (data.constructor.name == 'Array') {
-        this._raw = Tabular._objectArrayToRaw(data);
+        this.raw = Tabular._objectArrayToRaw(data);
     } else {
         throw 'Tabular(): Wrong data format.';
     }
@@ -32,24 +33,72 @@ Tabular = function (data) {
  * @returns {string}
  */
 Tabular.prototype.toTsv = function () {
-    if (this._raw.length > 0) {
-        this._raw[0] = Tabular._makeHeaders(this._raw[0]);
+    if (this.raw.length > 0) {
+        this.raw[0] = Tabular._makeHeaders(this.raw[0]);
     }
-    return this._raw.map(row => row.join("\t")).join("\n");
+    return this.raw.map(row => row.join("\t")).join("\n");
+};
+
+/**
+ * Get the data as comma-separated-values.
+ * @returns {string}
+ */
+Tabular.prototype.toCsv = function () {
+    if (this.raw.length > 0) {
+        this.raw[0] = Tabular._makeHeaders(this.raw[0]);
+    }
+    
+    return this.raw.map(row => {
+        row = row.map(cell => {
+            if (cell.indexOf('"') >= 0 || cell.indexOf(',') >= 0) {
+                cell = '"' + cell.replace(/"/g, '""') + '"';
+            }
+            return cell;
+        });
+        return row.join(',');
+    }).join("\n");
+};
+
+/**
+ * Downloads the data as an Excel file.
+ * @param {string} filename 
+ * @param {XLSX} xlsx XLSX object from http://sheetjs.com
+ */
+Tabular.prototype.downloadAsExcel = function (filename, xlsx) {
+    if (typeof xlsx == 'undefined' || !xlsx) {
+        if (typeof XLSX == 'undefined' || !XLSX) {
+            throw "Missing XLSX object in Tabular.downloadAsExcel().";
+        }
+        xlsx = XLSX;
+    }
+    
+    var wb = xlsx.utils.book_new(),
+        ws = xlsx.utils.aoa_to_sheet(this.raw);
+    
+    xlsx.utils.book_append_sheet(wb, ws);
+    
+    if (typeof filename == 'undefined') {
+        filename = 'download';
+    }
+    
+    if (!filename.match(/\.xlsx?$/i)) {
+        filename += '.xlsx';
+    }
+    
+    xlsx.writeFile(wb, filename);
 };
 
 /**
  * Get the data as an array of objects.
- * @returns {array} Array of vanilla objects
+ * @returns {array} Array of plain Javascript objects
  */
 Tabular.prototype.toObjectArray = function () {
-    const first_line = this._raw.shift();
-    const headers = Tabular._makeHeaders(first_line);
-    var data = this._raw.map(line => Tabular._makeObjectFromRawEntry(line, headers));
-    this._raw.unshift(first_line);
+    var first_line = this.raw.shift();
+    var headers = Tabular._makeHeaders(first_line);
+    var data = this.raw.map(line => Tabular._makeObjectFromRawEntry(line, headers));
+    this.raw.unshift(first_line);
     return data;
 };
-
 
 /**
  * Get the data as an HTML table.
@@ -71,8 +120,8 @@ Tabular.prototype.toHtml = function (css_class_func) {
 
     var html = [];
     
-    html.push(openTag('table', css_class_func('table', this._raw)));
-    this._raw.forEach((row, row_idx) => {
+    html.push(openTag('table', css_class_func('table', this.raw)));
+    this.raw.forEach((row, row_idx) => {
         html.push(openTag('tr', css_class_func('row', row, row_idx)));
             row.forEach((cell, cell_idx) => {
                 var tag = row_idx == 0 ? 'th' : 'td';
