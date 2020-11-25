@@ -111,7 +111,7 @@ Tabular.prototype.toObjectArray = function () {
  *   the headers row is row[0].
  * @returns {string}
  */
-Tabular.prototype.toHtml = function (css_class_func) {
+Tabular.prototype.toHtmlTable = function (css_class_func) {
     if (typeof css_class_func != 'function') {
         css_class_func = () => null;
     }

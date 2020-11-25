@@ -35,8 +35,8 @@ let tsv1 = tab1.toTsv();
 let tsv2 = tab2.toTsv();
 let objarr1 = tab1.toObjArr();
 let objarr2 = tab2.toObjArr();
-let html1 = tab1.toHtml();
-let html2 = tab2.toHtml();
+let html1 = tab1.toHtmlTable();
+let html2 = tab2.toHtmlTable();
 ```
 
 Bear in mind that the _headers_ or _column names_ are normalized before generating the output:
@@ -59,26 +59,32 @@ col_1_2
   - [x] load object array
   - [x] to TSV
   - [x] to object array
-  - [ ] to HTML
-- [x] add usage instructions to this file
-- [ ] method toCsv(sep = ',', quote = '"') --> must accept also Csv
-  - [ ] static method _csvToRaw(data, sep = ',', quote = '"')
-- [ ] method toJson() --> shortcut for JSON.stringify(<tabular object>.toObjectArray())
-  - [ ] static method _jsonToRaw(data) --> shortcut for new Tabular(JSON.parse(data))
-- [ ] method downloadAsExcel(filename, xlsx "instance") --> needs xlsx.js passed as argument <https://github.com/SheetJS/sheetjs#installation>
-- [ ] static method fromExcelFile(file, xlsx "instance") --> used for drag'n'drop
-- [ ] method downloadAsCsv(filename)
-- [ ] method downloadAsTsv(filename)
-- [ ] method downloadAsJson(filename)
-- [ ] method toMarkdown()
-- [ ] method downloadAsMarkdown(filename)
-- [ ] static method fromFile(file) --> used for drag'n'drop, try to guess file type
-- [ ] static method fromTsv(data)
-- [ ] static method fromObjectArray(data)
-- [ ] static method fromCsv(data)
-- [ ] static method fromJson(data)
+  - [ ] to HTML table
+- [ ] CSV
+  - [x] method `toCsv()`
+    - [ ] document in `tabular.md`
+  - [ ] accept CSV in constructor
+    - [ ] private static method `_csvToRaw(data)`
+    - [ ] static method `fromCsv(data)`
+- [ ] JSON
+  - [ ] method toJson() --> shortcut for JSON.stringify(<tabular object>.toObjectArray())
+  - [ ] private static method _jsonToRaw(data)
+  - [ ] static method fromJson(data) --> shortcut for new Tabular(JSON.parse(data))
+- [ ] Excel
+  - [x] method downloadAsExcel(filename, xlsx_instance)
+    - [ ] document in `tabular.md`
+- [ ] method toMarkdownTable()
+- [ ] accept drag'n'drop files
+  - [ ] static method fromFile(file) --> used for drag'n'drop, try to guess file type
+  - [ ] static method fromExcelFile(file, xlsx_instance)
+  - [ ] static method fromTsv(data)
+  - [ ] static method fromObjectArray(data)
+  - [ ] static method fromJson(data)
 
 ## Changelog
+
+v1.1, 2020-11-25
+Added toCsv() and downloadAsExcel().
 
 v1.0, 2020-10-06
 Initial release.
